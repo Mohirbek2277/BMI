@@ -51,7 +51,7 @@ def photo(update: Update, _: CallbackContext) -> int:
     photo_file.download('user_photo.jpg')
     logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')
     update.message.reply_text(
-        'Gorgeous! Now, send me your location please, or send /skip if you don\'t want to.'
+        'Ajoyib! Hozir, Iltimos! menga manzilingizni yuboring yoki /skip orqali o`tkazib yuboring'
     )
 
     return LOCATION
@@ -59,9 +59,9 @@ def photo(update: Update, _: CallbackContext) -> int:
 
 def skip_photo(update: Update, _: CallbackContext) -> int:
     user = update.message.from_user
-    logger.info("User %s did not send a photo.", user.first_name)
+    logger.info("User %s rasm yubormadi.", user.first_name)
     update.message.reply_text(
-        'I bet you look great! Now, send me your location please, or send /skip.'
+        'Men sizning ajoyib ko`rinishingizga ishonaman! Hozir, Iltimos menga manzilingizni yuboring'
     )
 
     return LOCATION
@@ -71,7 +71,7 @@ def location(update: Update, _: CallbackContext) -> int:
     user = update.message.from_user
     user_location = update.message.location
     logger.info(
-        "Location of %s: %f / %f", user.first_name, user_location.latitude, user_location.longitude
+        "Manzili: %s: %f / %f", user.first_name, user_location.latitude, user_location.longitude
     )
     update.message.reply_text(
         'Maybe I can visit you sometime! At last, tell me something about yourself.'
