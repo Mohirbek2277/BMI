@@ -10,7 +10,7 @@ from telegram.ext import (
     CallbackContext,
 )
 
-# Enable logging
+# Jurnalga yozishni yoqish
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
 )
@@ -24,9 +24,9 @@ def start(update: Update, _: CallbackContext) -> int:
     reply_keyboard = [['Boy', 'Girl', 'Other']]
 
     update.message.reply_text(
-        'Hi! My name is Professor Bot. I will hold a conversation with you. '
-        'Send /cancel to stop talking to me.\n\n'
-        'Are you a boy or a girl?',
+        'Salom! Mening ismim universal bot. Men siz bilan uxbat o`tkazaman. '
+        'men bilan gaplashishni istamasangiz /cancel ni bosing.\n\n'
+        'Siz o`g`il bolamisiz yoki qizmisiz?',
         reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True),
     )
 
