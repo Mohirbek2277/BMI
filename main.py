@@ -37,7 +37,7 @@ def gender(update: Update, _: CallbackContext) -> int:
     user = update.message.from_user
     logger.info("Gender of %s: %s", user.first_name, update.message.text)
     update.message.reply_text(
-        'I see! Please send me a photo of yourself, '
+        'Iltimos, menga o`zingizning fotosuratingizni yuboring, '
         'so I know what you look like, or send /skip if you don\'t want to.',
         reply_markup=ReplyKeyboardRemove(),
     )
@@ -74,7 +74,7 @@ def location(update: Update, _: CallbackContext) -> int:
         "Manzili: %s: %f / %f", user.first_name, user_location.latitude, user_location.longitude
     )
     update.message.reply_text(
-        'Maybe I can visit you sometime! At last, tell me something about yourself.'
+        'Menga o`zingiz haqingizda biron narsa aytib bering.'
     )
 
     return BIO
@@ -84,7 +84,7 @@ def skip_location(update: Update, _: CallbackContext) -> int:
     user = update.message.from_user
     logger.info("User %s did not send a location.", user.first_name)
     update.message.reply_text(
-        'You seem a bit paranoid! At last, tell me something about yourself.'
+        'Sizning paranoid emasligingizga ishonch hosil qilishim uchun o`zingiz haqingiizda bo=iron narsa aytib bering.'
     )
 
     return BIO
@@ -93,16 +93,16 @@ def skip_location(update: Update, _: CallbackContext) -> int:
 def bio(update: Update, _: CallbackContext) -> int:
     user = update.message.from_user
     logger.info("Bio of %s: %s", user.first_name, update.message.text)
-    update.message.reply_text('Thank you! I hope we can talk again some day.')
+    update.message.reply_text('Raxmat! Umid qilamanki biz yana bir kun gaplashamiz.')
 
     return ConversationHandler.END
 
 
 def cancel(update: Update, _: CallbackContext) -> int:
     user = update.message.from_user
-    logger.info("User %s canceled the conversation.", user.first_name)
+    logger.info("Foydalanuvchi %s suxbatni bekor qildi.", user.first_name)
     update.message.reply_text(
-        'Bye! I hope we can talk again some day.', reply_markup=ReplyKeyboardRemove()
+        'Xayr! Umid qilamanki, biz yana bir kun gaplashamiz.', reply_markup=ReplyKeyboardRemove()
     )
 
     return ConversationHandler.END
@@ -119,7 +119,7 @@ def main() -> None:
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
         states={
-            GENDER: [MessageHandler(Filters.regex('^(Boy|Girl|Other)$'), gender)],
+            GENDER: [MessageHandler(Filters.regex('^(O`g`il bola|Qiz bola|boshqa..)$'), gender)],
             PHOTO: [MessageHandler(Filters.photo, photo), CommandHandler('skip', skip_photo)],
             LOCATION: [
                 MessageHandler(Filters.location, location),
