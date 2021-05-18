@@ -1,145 +1,110 @@
-import logging
-
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 from telegram.ext import (
-    Updater,
+    Updater, 
     CommandHandler,
-    MessageHandler,
-    Filters,
+    CallbackQueryHandler,
     ConversationHandler,
-    CallbackContext,
+    MessageHandler,
+    Filters
 )
 
-# Jurnalga yozishni yoqish
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
-)
+MANBA = 1
+SINOV = 2
 
-logger = logging.getLogger(__name__)
+BTN_USER, BTN_RESURS, BTN_ANALYSIS, BTN_RESULT, BTN_SELF = ('👤 Foydalanuvchi', '📚 Manbalar', '🧪 Sinov', '📊 Mening Natijalarim', '📞 Biz bilan aloqa')
 
-GENDER, PHOTO, LOCATION, BIO = range(4)
+main_buttons = ReplyKeyboardMarkup([
+        [BTN_USER, BTN_RESURS], [BTN_ANALYSIS, BTN_RESULT], [BTN_SELF]
+    ], resize_keyboard = True)
 
-
-def start(update: Update, _: CallbackContext) -> int:
-    reply_keyboard = [['Boy', 'Girl', 'Other']]
-
-    update.message.reply_text(
-        'Salom! Mening ismim universal bot. Men siz bilan uxbat o`tkazaman. '
-        'men bilan gaplashishni istamasangiz /cancel ni bosing.\n\n'
-        'Siz o`g`il bolamisiz yoki qizmisiz?',
-        reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True),
-    )
-
-    return GENDER
-
-
-def gender(update: Update, _: CallbackContext) -> int:
+def start(update, context):
     user = update.message.from_user
-    logger.info("Gender of %s: %s", user.first_name, update.message.text)
-    update.message.reply_text(
-        'Iltimos, menga o`zingizning fotosuratingizni yuboring, '
-        'so I know what you look like, or send /skip if you don\'t want to.',
-        reply_markup=ReplyKeyboardRemove(),
-    )
+    buttons = [
+        [
+            InlineKeyboardButton('Matem', callback_data = 'fan1'),
+            InlineKeyboardButton('Fizika', callback_data = 'fan2')
+        ]
+    ]
 
-    return PHOTO
+    update.message.reply_text('Assalomu Aleykum {} \n<b>Sizga qaysi fan bo`yicha ma`lumot beraylik!</b>'.
+        format(user.first_name),
+        reply_markup = InlineKeyboardMarkup(buttons),
+        parse_mode = "HTML")
+    return SINOV
 
+def self_user():
+    update.message.reply_text('Foydalanuvchi bosildi')
 
-def photo(update: Update, _: CallbackContext) -> int:
-    user = update.message.from_user
-    photo_file = update.message.photo[-1].get_file()
-    photo_file.download('user_photo.jpg')
-    logger.info("Photo of %s: %s", user.first_name, 'user_photo.jpg')
-    update.message.reply_text(
-        'Ajoyib! Hozir, Iltimos! menga manzilingizni yuboring yoki /skip orqali o`tkazib yuboring'
-    )
+def self_manba():
+    update.message.reply_text('Manbalar bosildi')
 
-    return LOCATION
+def self_sinov():
+    update.message.reply_text('Sinov bosildi')
 
+def self_natija():
+    update.message.reply_text('Meningnatijalaim bosildi')
 
-def skip_photo(update: Update, _: CallbackContext) -> int:
-    user = update.message.from_user
-    logger.info("User %s rasm yubormadi.", user.first_name)
-    update.message.reply_text(
-        'Men sizning ajoyib ko`rinishingizga ishonaman! Hozir, Iltimos menga manzilingizni yuboring'
-    )
-
-    return LOCATION
+def self_Aloqa():
+    update.message.reply_text('aloqa bosildi')
 
 
-def location(update: Update, _: CallbackContext) -> int:
-    user = update.message.from_user
-    user_location = update.message.location
-    logger.info(
-        "Manzili: %s: %f / %f", user.first_name, user_location.latitude, user_location.longitude
-    )
-    update.message.reply_text(
-        'Menga o`zingiz haqingizda biron narsa aytib bering.'
-    )
+def zaproslar(update, context):
 
-    return BIO
+    query = update.callback_query
+    query.message.delete()
+    query.message.reply_text('<i>Tegishli bo`limni tanlang:</i> 👇',
+        reply_markup = main_buttons,
+        parse_mode = "HTML")
+    return MANBA
 
+def asosiy():
+    #updater - yangilanuvchi
+    updater = Updater('1880690891:AAFkFv7O1oGUj3KqyyMmgDcdwmB2-zJ3EGU', use_context = True)
 
-def skip_location(update: Update, _: CallbackContext) -> int:
-    user = update.message.from_user
-    logger.info("User %s did not send a location.", user.first_name)
-    update.message.reply_text(
-        'Sizning paranoid emasligingizga ishonch hosil qilishim uchun o`zingiz haqingiizda bo=iron narsa aytib bering.'
-    )
-
-    return BIO
-
-
-def bio(update: Update, _: CallbackContext) -> int:
-    user = update.message.from_user
-    logger.info("Bio of %s: %s", user.first_name, update.message.text)
-    update.message.reply_text('Raxmat! Umid qilamanki biz yana bir kun gaplashamiz.')
-
-    return ConversationHandler.END
-
-
-def cancel(update: Update, _: CallbackContext) -> int:
-    user = update.message.from_user
-    logger.info("Foydalanuvchi %s suxbatni bekor qildi.", user.first_name)
-    update.message.reply_text(
-        'Xayr! Umid qilamanki, biz yana bir kun gaplashamiz.', reply_markup=ReplyKeyboardRemove()
-    )
-
-    return ConversationHandler.END
-
-
-def main() -> None:
-    # Create the Updater and pass it your bot's token.
-    updater = Updater("1400945381:AAHBAwc9z9k4qF-LcV_smSJJXC-5S9d6VQ0")
-
-    # Get the dispatcher to register handlers
     dispatcher = updater.dispatcher
 
-    # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('start', start)],
-        states={
-            GENDER: [MessageHandler(Filters.regex('^(O`g`il bola|Qiz bola|boshqa..)$'), gender)],
-            PHOTO: [MessageHandler(Filters.photo, photo), CommandHandler('skip', skip_photo)],
-            LOCATION: [
-                MessageHandler(Filters.location, location),
-                CommandHandler('skip', skip_location),
-            ],
-            BIO: [MessageHandler(Filters.text & ~Filters.command, bio)],
+        entry_points = [CommandHandler('start', start)],
+        states = {
+            SINOV: [CallbackQueryHandler(zaproslar)],
+            MANBA: [
+                MessageHandler(Filters.regex('^('+BTN_USER+')$'), self_user),
+                MessageHandler(Filters.regex('^('+BTN_USER+')$'), self_manba),
+                MessageHandler(Filters.regex('^('+BTN_USER+')$'), self_sinov),
+                MessageHandler(Filters.regex('^('+BTN_USER+')$'), self_natija),
+                MessageHandler(Filters.regex('^('+BTN_USER+')$'), self_Aloqa)
+            ]
         },
-        fallbacks=[CommandHandler('cancel', cancel)],
+        fallbacks = [CommandHandler('start', start)]
     )
-
     dispatcher.add_handler(conv_handler)
 
-    # Start the Bot
     updater.start_polling()
-
-    # Run the bot until you press Ctrl-C or the process receives SIGINT,
-    # SIGTERM or SIGABRT. This should be used most of the time, since
-    # start_polling() is non-blocking and will stop the bot gracefully.
     updater.idle()
 
+asosiy()
 
-if __name__ == '__main__':
-    main()
+
+
+
+
+
+'''
+def start(update, context):
+    try:
+        contact_keyboard = telegram.KeyboardButton(text="Telefon raqamni yuborish", request_contact=True)
+        custom_keyboard = [
+            [
+                contact_keyboard
+            ]
+        ]
+        reply_markup = telegram.ReplyKeyboardMarkup(custom_keyboard, resize_keyboard = True)
+        
+        update.message.reply_text(
+                text = '<b>Botdan foylanishingiz uchun iltimos</b>\n<i>Telefon raqam</i>ingizni yuboring: 👇', 
+                reply_markup = reply_markup,
+                parse_mode = "HTML"
+                )
+    except Exception as e:
+        print(str(e))
+'''
